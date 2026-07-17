@@ -11,8 +11,12 @@ from django.db.models import Sum, Count, F, Q, ExpressionWrapper, FloatField
 from django.db.models.functions import TruncDay, TruncWeek, TruncMonth, ExtractHour
 from django.utils import timezone
 from django.core.cache import cache
-from channels.layers import get_channel_layer
-from asgiref.sync import async_to_sync
+try:
+    from channels.layers import get_channel_layer
+    from asgiref.sync import async_to_sync
+except ImportError:
+    get_channel_layer = None
+    async_to_sync = None
 from django.template.loader import get_template
 from django.http import HttpResponse
 from django.contrib import messages
