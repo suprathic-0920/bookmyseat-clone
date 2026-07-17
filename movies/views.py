@@ -335,10 +335,11 @@ def book_seats(request, theater_id):
                     seat.save()
                     seat_ids.append(seat.id)
                     try:
-                        async_to_sync(channel_layer.group_send)(
-                            f'theater_{theater_id}',
-                            {'type': 'seat_update', 'action': 'locked', 'seat_id': seat.id}
-                        )
+                        if channel_layer and async_to_sync:
+                            async_to_sync(channel_layer.group_send)(
+                                f'theater_{theater_id}',
+                                {'type': 'seat_update', 'action': 'locked', 'seat_id': seat.id}
+                            )
                     except Exception as e:
                         pass
         except OperationalError:
