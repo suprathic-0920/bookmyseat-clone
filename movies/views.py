@@ -327,7 +327,7 @@ def book_seats(request, theater_id):
                     return redirect('book_seats', theater_id=theater_id)
                 
                 # 3. Apply locks and Broadcast over WebSockets
-                channel_layer = get_channel_layer()
+                channel_layer = get_channel_layer() if get_channel_layer else None
                 for seat in selected_seats:
                     seat.is_locked = True
                     seat.locked_by = request.user
