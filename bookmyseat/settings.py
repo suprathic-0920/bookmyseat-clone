@@ -16,6 +16,9 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+# Detect if running on Vercel
+IS_VERCEL = os.environ.get('VERCEL', False)
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -36,8 +39,6 @@ ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.vercel.app']
 # Application definition
 
 INSTALLED_APPS = [
-    # 'daphne',  # Commented out: incompatible with Python 3.14 (twisted typing issue)
-    'channels',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -46,8 +47,12 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'users',
     'movies',
-    'django_celery_results',
 ]
+
+# Only add these apps when NOT on Vercel (they need Redis/Celery)
+if not IS_VERCEL:
+    INSTALLED_APPS.insert(0, 'channels')
+    INSTALLED_APPS.append('django_celery_results')
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -85,13 +90,13 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'bookmyseat.wsgi.application'
-ASGI_APPLICATION = 'bookmyseat.asgi.application'
-
-CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': 'channels.layers.InMemoryChannelLayer'
+if not IS_VERCEL:
+    ASGI_APPLICATION = 'bookmyseat.asgi.application'
+    CHANNEL_LAYERS = {
+        'default': {
+            'BACKEND': 'channels.layers.InMemoryChannelLayer'
+        }
     }
-}
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
@@ -153,7 +158,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 STRIPE_PUBLIC_KEY = os.environ.get('STRIPE_PUBLIC_KEY', 'pk_test_51TmywALqxFHwaBz4YYFkRSAQx1bpDCuj96pCM2lB7H47zIq5Dds061XS1eyljjLrvFge0BN4CAUFgWAqPsBqPEPU00hVUJ17mx')
 STRIPE_SECRET_KEY = os.environ.get('STRIPE_SECRET_KEY', '')
 STRIPE_WEBHOOK_SECRET = os.environ.get('STRIPE_WEBHOOK_SECRET', '')
-DOMAIN_URL = 'http://127.0.0.1:8000'
+if IS_VERCEL:
+    DOMAIN_URL = 'https://bookmyseat-clone-iota.vercel.app'
+else:
+    DOMAIN_URL = 'http://127.0.0.1:8000'
 
 # Celery & Redis Configuration for Task 2
 CELERY_BROKER_URL = "redis://127.0.0.1:6379/0"
@@ -162,12 +170,19 @@ CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_TASK_ALWAYS_EAGER = True  # Run tasks synchronously for local development without needing a worker
 
-CACHES = {
-    "default": {
-        "BACKEND": "django.core.cache.backends.redis.RedisCache",
-        "LOCATION": "redis://127.0.0.1:6379/1",
+if IS_VERCEL:
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        }
     }
-}
+else:
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.redis.RedisCache",
+            "LOCATION": "redis://127.0.0.1:6379/1",
+        }
+    }
 
 # Task 6: Automated Ticket Email Configuration
 EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
