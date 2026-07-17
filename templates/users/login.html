@@ -3,7 +3,7 @@
 {% block content %}
 <div class="container py-5">
     <div class="row justify-content-center">
-        <div class="col-md-6">
+        <div class="col-md-6 gsap-fade-up">
             <div class="card shadow">
                 <div class="card-header bg-primary text-white">
                     <h5 class="modal-title mb-0" id="loginModalLabel">
@@ -56,22 +56,6 @@
     </div>
 </div>
 
-<style>
-    .card {
-        border-radius: 1rem;
-    }
-    .card-header {
-        border-top-left-radius: 1rem;
-        border-top-right-radius: 1rem;
-    }
-    .input-group-text {
-        background-color: #f8f9fa;
-    }
-    .form-control:focus {
-        box-shadow: none;
-        border-color: #80bdff;
-    }
-</style>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {

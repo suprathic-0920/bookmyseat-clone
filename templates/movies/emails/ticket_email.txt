@@ -1,0 +1,17 @@
+Hi {{ user.username }},
+
+Your tickets for {{ movie.name }} have been successfully booked!
+
+TICKET DETAILS:
+- Movie: {{ movie.name }}
+- Theater: {{ theater.name }}
+- Showtime: {{ theater.time|date:"F j, Y, P" }}
+- Seats: {{ seat_numbers }}
+- Payment ID: {{ payment_id }}
+
+Please present your digital ticket at the theater. You can view your full ticket in your profile at any time.
+
+Enjoy the show!
+
+--
+BookMySeat Team

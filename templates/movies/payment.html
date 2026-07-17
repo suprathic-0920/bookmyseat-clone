@@ -1,0 +1,247 @@
+{% extends "users/basic.html" %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 gsap-fade-up">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-credit-card me-2"></i> Complete Payment</h5>
+                </div>
+                <div class="card-body">
+                    {% if error %}
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i> {{ error }}
+                        <div class="mt-3">
+                            <a href="{% url 'movie_list' %}" class="btn btn-outline-danger">Return to Home</a>
+                        </div>
+                    </div>
+                    {% else %}
+                    
+                    <div class="text-center mb-4">
+                        <div class="spinner-border text-primary" role="status" id="timer-spinner"></div>
+                        <h4 class="mt-3 text-warning">Time remaining: <span id="time-left">{{ time_left }}</span> seconds</h4>
+                        <p class="text-muted">Please complete your payment before the timer expires.</p>
+                    </div>
+
+                    <div class="mb-4 p-3 rounded" style="background-color: var(--surface-light); border: 1px solid var(--border-color);">
+                        <h5>Booking Details:</h5>
+                        <p><strong>Movie:</strong> {{ theater.movie.name }}</p>
+                        <p><strong>Theater:</strong> {{ theater.name }}</p>
+                        <p><strong>Seats:</strong> 
+                            {% for seat in seats %}
+                                <span class="badge bg-secondary me-1">{{ seat.seat_number }}</span>
+                            {% endfor %}
+                        </p>
+                    </div>
+
+                    <form method="POST" action="{% url 'payment_view' %}">
+                        {% csrf_token %}
+                        
+                        <div class="mb-4 p-4 rounded shadow" style="background-color: #1a1a2e; border: 1px solid #16213e;">
+                            <h5 class="mb-4 font-weight-bold text-white border-bottom border-secondary pb-3">Add Food & Beverages <i class="fas fa-popcorn text-warning ms-2"></i></h5>
+                            {% if food_items %}
+                                <div class="food-list">
+                                {% for food in food_items %}
+                                    <div class="d-flex align-items-center justify-content-between p-3 mb-3 rounded food-item-card" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); transition: all 0.3s ease;">
+                                        <div class="d-flex align-items-center">
+                                            {% if food.image %}
+                                                <img src="{{ food.image.url }}" alt="{{ food.name }}" class="rounded shadow-sm me-3" style="width: 65px; height: 65px; object-fit: cover; border: 2px solid rgba(255,255,255,0.1);">
+                                            {% else %}
+                                                <div class="bg-dark rounded shadow-sm me-3 d-flex justify-content-center align-items-center" style="width: 65px; height: 65px; border: 1px solid rgba(255,255,255,0.1); font-size: 32px;">
+                                                    {% if 'Popcorn' in food.name %}
+                                                        🍿
+                                                    {% elif 'Cola' in food.name or 'Drink' in food.name or 'Water' in food.name %}
+                                                        🥤
+                                                    {% elif 'Nachos' in food.name %}
+                                                        🌮
+                                                    {% elif 'Hot Dog' in food.name %}
+                                                        🌭
+                                                    {% elif 'Burger' in food.name %}
+                                                        🍔
+                                                    {% elif 'Pizza' in food.name %}
+                                                        🍕
+                                                    {% elif 'Fries' in food.name %}
+                                                        🍟
+                                                    {% elif 'Combo' in food.name %}
+                                                        🍱
+                                                    {% else %}
+                                                        🍽️
+                                                    {% endif %}
+                                                </div>
+                                            {% endif %}
+                                            <div>
+                                                <h6 class="mb-1 fw-bold text-white" style="letter-spacing: 0.5px;">{{ food.name }}</h6>
+                                                <div class="text-success fw-bold small">₹{{ food.price }}</div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Custom Stepper -->
+                                        <div class="d-flex align-items-center rounded-pill px-2 py-1 shadow-sm" style="background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1);">
+                                            <button type="button" class="btn btn-sm text-white rounded-circle d-flex justify-content-center align-items-center decrement-btn" data-id="{{ food.id }}" style="width: 32px; height: 32px; background: rgba(255,255,255,0.1); border: none; transition: 0.2s;">
+                                                <i class="fas fa-minus" style="font-size: 12px;"></i>
+                                            </button>
+                                            
+                                            <input type="hidden" name="food_{{ food.id }}" id="food-input-{{ food.id }}" data-price="{{ food.price }}" value="0" class="food-qty">
+                                            <span id="food-display-{{ food.id }}" class="text-white fw-bold mx-3" style="font-size: 16px; min-width: 20px; text-align: center;">0</span>
+                                            
+                                            <button type="button" class="btn btn-sm btn-danger text-white rounded-circle d-flex justify-content-center align-items-center increment-btn" data-id="{{ food.id }}" style="width: 32px; height: 32px; border: none; transition: 0.2s; box-shadow: 0 4px 8px rgba(220, 53, 69, 0.4);">
+                                                <i class="fas fa-plus" style="font-size: 12px;"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                                </div>
+                            {% else %}
+                                <p class="text-muted mb-0">No food items available at this theater.</p>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-4 p-4 rounded shadow" style="background-color: #1a1a2e; border: 1px solid #16213e;">
+                            <h5 class="mb-3 font-weight-bold text-white border-bottom border-secondary pb-3">Apply Coupon <i class="fas fa-tags text-warning ms-2"></i></h5>
+                            <div class="input-group">
+                                <input type="text" name="coupon" id="coupon-input" class="form-control bg-dark text-white border-secondary" placeholder="Enter code (e.g. TAP100, BOGO)">
+                                <button class="btn btn-outline-success" type="button" id="apply-coupon-btn">Apply</button>
+                            </div>
+                            <small id="coupon-message" class="text-success mt-2 d-none"></small>
+                        </div>
+
+                        <div class="mb-4 p-3 rounded text-center" style="background-color: var(--surface-light); border: 1px solid var(--border-color);">
+                            <h5>Total Amount</h5>
+                            <h2 class="text-success fw-bold" id="total-price" data-base="{{ total }}">₹{{ total }}</h2>
+                        </div>
+
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg" id="pay-btn">
+                                <i class="fas fa-lock me-2"></i> Proceed to Secure Checkout (Stripe)
+                            </button>
+                        </div>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Simple JS Timer to redirect on expiry
+    let timeLeft = parseInt(document.getElementById('time-left')?.innerText || 0);
+    if(timeLeft > 0) {
+        const timerInterval = setInterval(() => {
+            timeLeft--;
+            document.getElementById('time-left').innerText = timeLeft;
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                document.getElementById('pay-btn').disabled = true;
+                document.getElementById('timer-spinner').classList.replace('text-primary', 'text-danger');
+                alert("Time expired! The seats have been released.");
+                window.location.href = "{% url 'movie_list' %}";
+            }
+        }, 1000);
+    }
+
+    // Dynamic total price calculation for food
+    const priceEl = document.getElementById('total-price');
+    const basePrice = parseFloat(priceEl.getAttribute('data-base'));
+    const ticketCount = {{ seats|length }};
+    let discountAmount = 0;
+    
+    // Coupon Logic
+    const couponBtn = document.getElementById('apply-coupon-btn');
+    const couponInput = document.getElementById('coupon-input');
+    const couponMessage = document.getElementById('coupon-message');
+    
+    if (couponBtn) {
+        couponBtn.addEventListener('click', function() {
+            const code = couponInput.value.trim().toUpperCase();
+            let currentFoodTotal = 0;
+            document.querySelectorAll('.food-qty').forEach(inp => {
+                const qty = parseInt(inp.value) || 0;
+                const price = parseFloat(inp.getAttribute('data-price'));
+                currentFoodTotal += (qty * price);
+            });
+            let currentTotal = basePrice + currentFoodTotal;
+            let discount = 0;
+            
+            if (code === 'TAP100' && ticketCount >= 2) {
+                discount = 100;
+                couponMessage.textContent = 'Flat ₹100 off applied!';
+            } else if (code === 'PAYTM150') {
+                discount = 150;
+                couponMessage.textContent = '₹150 cashback discount applied!';
+            } else if (code === 'SUPER10') {
+                discount = currentTotal * 0.10;
+                couponMessage.textContent = 'Flat 10% off applied!';
+            } else if (code === 'FIRST20') {
+                discount = currentTotal * 0.20;
+                if (discount > 150) discount = 150;
+                couponMessage.textContent = '20% off (up to ₹150) applied!';
+            } else if (code === 'BOGO' && ticketCount >= 2) {
+                discount = 150; // One ticket free (base is 150)
+                couponMessage.textContent = 'Buy 1 Get 1 Free applied!';
+            } else {
+                couponMessage.textContent = 'Invalid or non-applicable coupon.';
+                couponMessage.classList.remove('text-success');
+                couponMessage.classList.add('text-danger');
+                couponMessage.classList.remove('d-none');
+                discountAmount = 0;
+                updatePrice();
+                return;
+            }
+            
+            couponMessage.classList.add('text-success');
+            couponMessage.classList.remove('text-danger');
+            couponMessage.classList.remove('d-none');
+            discountAmount = discount;
+            updatePrice();
+        });
+    }
+    
+    // Add hover effect via JS for a premium feel
+    document.querySelectorAll('.food-item-card').forEach(card => {
+        card.addEventListener('mouseenter', () => card.style.background = 'rgba(255,255,255,0.08)');
+        card.addEventListener('mouseleave', () => card.style.background = 'rgba(255,255,255,0.03)');
+    });
+
+    document.querySelectorAll('.increment-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const id = btn.getAttribute('data-id');
+            const input = document.getElementById('food-input-' + id);
+            let val = parseInt(input.value) || 0;
+            if(val < 10) {
+                input.value = val + 1;
+                document.getElementById('food-display-' + id).innerText = val + 1;
+                updatePrice();
+            }
+        });
+    });
+
+    document.querySelectorAll('.decrement-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const id = btn.getAttribute('data-id');
+            const input = document.getElementById('food-input-' + id);
+            let val = parseInt(input.value) || 0;
+            if(val > 0) {
+                input.value = val - 1;
+                document.getElementById('food-display-' + id).innerText = val - 1;
+                updatePrice();
+            }
+        });
+    });
+
+    function updatePrice() {
+        let extra = 0;
+        document.querySelectorAll('.food-qty').forEach(inp => {
+            const qty = parseInt(inp.value) || 0;
+            const price = parseFloat(inp.getAttribute('data-price'));
+            extra += (qty * price);
+        });
+        let finalTotal = basePrice + extra - discountAmount;
+        if (finalTotal < 0) finalTotal = 0;
+        priceEl.innerText = `₹${finalTotal}`;
+    }
+</script>
+{% endblock %}

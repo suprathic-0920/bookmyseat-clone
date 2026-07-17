@@ -1,0 +1,49 @@
+{% extends "users/basic.html" %}
+{% block content %}
+<div class="container mt-5 text-white">
+    <div class="row bg-dark p-4 rounded shadow">
+        <div class="col-md-4">
+            {% if event.image %}
+            <img src="{{ event.image.url }}" class="img-fluid rounded shadow-sm" alt="{{ event.name }}">
+            {% else %}
+            <div class="bg-secondary rounded d-flex justify-content-center align-items-center shadow-sm" style="height: 400px;">
+                <i class="fas fa-music fa-5x text-light"></i>
+            </div>
+            {% endif %}
+        </div>
+        <div class="col-md-8">
+            <h1 class="mb-3 text-warning font-weight-bold" style="font-size: 2.5rem;">{{ event.name }}</h1>
+            <h4 class="text-info"><i class="fas fa-tag"></i> {{ event.category }}</h4>
+            <h5 class="mt-3"><i class="fas fa-map-marker-alt"></i> Venue: {{ event.venue }}</h5>
+            <h5><i class="far fa-calendar-alt"></i> Date & Time: {{ event.date_time }}</h5>
+            
+            <p class="mt-4 text-light" style="font-size: 1.1rem; line-height: 1.6;">{{ event.description }}</p>
+            
+            <hr class="border-secondary my-4">
+            
+            <div class="d-flex justify-content-between align-items-center">
+                <h2 class="text-success m-0 font-weight-bold">Price: ₹{{ event.ticket_price }}</h2>
+                <h5 class="text-muted m-0">Available Tickets: {{ event.available_tickets }}</h5>
+            </div>
+            
+            <form action="{% url 'book_event' event.id %}" method="POST" class="mt-4">
+                {% csrf_token %}
+                <div class="form-group mb-4" style="max-width: 200px;">
+                    <label for="tickets_count" class="font-weight-bold text-light mb-2">Number of Tickets</label>
+                    <input type="number" name="tickets_count" id="tickets_count" class="form-control form-control-lg bg-dark text-white border-secondary" value="1" min="1" max="{{ event.available_tickets }}" required>
+                </div>
+                
+                {% if event.available_tickets > 0 %}
+                <button type="submit" class="btn btn-warning btn-lg w-100 font-weight-bold text-dark" style="letter-spacing: 1px; font-size: 1.2rem;">
+                    <i class="fas fa-ticket-alt"></i> PROCEED TO PAYMENT
+                </button>
+                {% else %}
+                <button type="button" class="btn btn-danger btn-lg w-100 font-weight-bold disabled text-white" style="letter-spacing: 1px; font-size: 1.2rem;">
+                    SOLD OUT
+                </button>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

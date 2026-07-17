@@ -1,188 +1,449 @@
-{% extends "users/basic.html" %} 
+{% extends "users/basic.html" %}
+{% load youtube_filters %}
 {% block content %}
 <style>
-    /* Styling */
-    body {
-  font-family: Arial, sans-serif;
-  background-color: #f8f9fa;
-  color: #333;
-  margin: 0;
-  padding: 0;
-}
-
-.container {
-  padding: 20px;
-  max-width: 900px;
-  margin: 0 auto;
-}
-
-.movie-title {
-  font-size: 28px;
-  font-weight: bold;
-  text-align: center;
-  margin-bottom: 20px;
-}
-
-/* Theatre Info Styling */
-.theatre-info {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 15px;
-  background-color: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  margin-bottom: 15px;
-  flex-wrap: wrap; /* Responsive wrapping */
-}
-
-.theatre-info strong {
-  font-size: 18px;
-  flex: 1;
-}
-
-/* Info Icons Styling */
-.info-icons {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 10px; /* Space between icons */
-  margin-top: 10px;
-  flex: 2;
-}
-
-.info-icons i {
-  margin-right: 5px;
-  font-size: 18px;
-}
-
-.info-section {
-  flex: 1;
-  text-align: right;
-}
-
-/* Show Times Styling */
-.show-times {
-  display: flex;
-  justify-content: space-between;
-  padding: 10px 0;
-  flex-wrap: wrap; /* Responsive wrapping */
-}
-
-.time-box {
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  padding: 10px 20px;
-  text-align: center;
-  background-color: #f1f1f1;
-  margin-bottom: 10px;
-  flex: 1;
-  min-width: 100px;
-  transition: transform 0.3s ease, background-color 0.3s ease;
-}
-
-.time-box:hover {
-  transform: scale(1.05);
-  background-color: #28a745;
-  color: white;
-}
-
-.time-box span {
-  display: block;
-  font-size: 12px;
-  color: black;
-}
-.time-box span:hover {
-  color: white;
-}
-
-/* Non-Cancellable Styling */
-.non-cancellable {
-  color: #ffc107;
-  font-size: 12px;
-  margin-top: 20px;
-  display: flex;
-  align-items: center;
-}
-
-.non-cancellable i {
-  margin-right: 5px;
-}
-
-/* Responsive Styling */
-@media (max-width: 768px) {
-  .theatre-info {
-    flex-direction: column;
-    align-items: flex-start;
+  /* Movie Hero Section */
+  .movie-title {
+    font-size: 32px;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 30px;
+    color: var(--text-main);
+    text-transform: uppercase;
+    letter-spacing: 1px;
   }
 
-  .info-section {
-    text-align: left;
+  .hero-card {
+    background-color: #12122b;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    position: relative;
+  }
+
+  .btn-trailer:hover {
+    transform: scale(1.05);
+    box-shadow: 0 5px 20px rgba(255, 75, 43, 0.4);
+  }
+
+  /* ===== Date Strip (Like BookMyShow App - Image 1) ===== */
+  .date-strip-container {
+    margin: 25px 0;
+    position: relative;
+  }
+  .date-strip {
+    display: flex;
+    gap: 0;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    border-bottom: 2px solid var(--border-color);
+  }
+  .date-strip::-webkit-scrollbar { display: none; }
+  .date-tab {
+    flex-shrink: 0;
+    text-align: center;
+    padding: 12px 20px 14px;
+    cursor: pointer;
+    text-decoration: none;
+    color: var(--text-muted);
+    border-bottom: 3px solid transparent;
+    transition: all 0.3s ease;
+    min-width: 80px;
+    position: relative;
+  }
+  .date-tab:hover {
+    color: var(--text-main);
+    background: rgba(229, 9, 20, 0.05);
+    text-decoration: none;
+  }
+  .date-tab.active {
+    color: var(--accent-color);
+    border-bottom-color: var(--accent-color);
+    font-weight: 600;
+  }
+  .date-tab .day-name {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 2px;
+  }
+  .date-tab .day-num {
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+  .date-tab .month-name {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .date-tab.today .day-name { color: var(--accent-color); }
+
+  /* Language & Format Filters */
+  .filter-bar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .filter-pill {
+    padding: 8px 18px;
+    border-radius: 20px;
+    border: 1px solid var(--border-color);
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    text-decoration: none;
+  }
+  .filter-pill:hover {
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+    text-decoration: none;
+  }
+  .filter-pill i { font-size: 11px; }
+
+  /* ===== Theater Cards (Like BookMyShow - Image 1) ===== */
+  .theater-card {
+    background: var(--surface-light);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    margin-bottom: 20px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+  .theater-card:hover {
+    border-color: rgba(229, 9, 20, 0.2);
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+  }
+  .theater-header {
+    padding: 20px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .theater-name-area {
+    flex: 1;
+  }
+  .theater-name {
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .theater-name .info-icon {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 1px solid var(--text-muted);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    color: var(--text-muted);
+    cursor: help;
+  }
+  .theater-subtitle {
+    font-size: 12px;
+    color: #ffc107;
+    margin-top: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .theater-subtitle i { font-size: 10px; }
+  .theater-heart {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 20px;
+    cursor: pointer;
+    transition: color 0.3s;
+    padding: 0;
+  }
+  .theater-heart:hover { color: var(--accent-color); }
+
+  /* Showtime Boxes */
+  .showtime-area {
+    padding: 0 24px 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .showtime-box {
+    border: 1px solid rgba(0, 200, 0, 0.4);
+    border-radius: 8px;
+    padding: 10px 18px;
+    text-align: center;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    min-width: 120px;
+    position: relative;
+  }
+  .showtime-box:hover {
+    transform: translateY(-2px);
+    background: rgba(0, 200, 0, 0.08);
+    border-color: rgba(0, 200, 0, 0.6);
+    box-shadow: 0 4px 15px rgba(0, 200, 0, 0.15);
+    text-decoration: none;
+  }
+  .showtime-box .time {
+    font-size: 15px;
+    font-weight: 600;
+    color: #00c853;
+  }
+  .showtime-box .screen-type {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 3px;
+  }
+  .showtime-box .night-icon {
+    position: absolute;
+    top: 5px;
+    right: 8px;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  /* Info badges */
+  .amenity-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
     margin-top: 10px;
   }
-
-  .show-times {
-    justify-content: space-between;
+  .amenity-badge {
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-color);
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 5px;
   }
+  .amenity-badge i { font-size: 10px; }
 
-  .time-box {
-    flex: 1 1 100%;
-    margin-bottom: 10px;
+  /* Non-cancellable */
+  .non-cancellable {
+    color: #ffc107;
+    font-size: 13px;
+    margin-top: 20px;
+    display: flex;
+    align-items: center;
+    background: rgba(255, 193, 7, 0.1);
+    padding: 10px 15px;
+    border-radius: 6px;
+    display: inline-flex;
   }
-}
-  </style>
-  
-  <body>
-    <div class="container">
-      <!-- Movie Title -->
-      <div class="movie-title">Movie - {{ movie.name }}</div>
-  
-      <!-- Conditional Check for Theaters -->
-      {% if theaters %}
-        <!-- Theater List and Showtimes -->
-        {% for theater in theaters %}
-        <div class="theatre-info">
-          <div>
-            <strong>{{ theater.name }} Theater</strong>
-            <div class="info-icons mt-2">
-              <i class="fas fa-mobile-alt text-success"></i> M-Ticket
-              <i class="fas fa-utensils text-warning ms-3"></i> Food & Beverage
-              <i class="fas fa-parking text-primary ms-3"></i> Parking Available
-              <i class="fas fa-wheelchair text-info ms-3"></i> Wheelchair Access
-              <i class="fas fa-glasses text-danger ms-3"></i> 3D Show Available
-            </div>
-          </div>
+  .non-cancellable i { margin-right: 8px; }
+
+  @media (max-width: 768px) {
+    .theater-header { flex-direction: column; }
+    .showtime-box { min-width: 100px; }
+    .date-tab { padding: 10px 14px; min-width: 65px; }
+    .date-tab .day-num { font-size: 18px; }
+  }
+</style>
+
+<div class="container mt-4">
+  <!-- Premium Hero Section -->
+  <div class="hero-card mb-5 mt-3 gsap-fade-up">
+    <div class="row g-0">
+      <div class="col-md-4 p-4 text-center">
+        {% if movie.image %}
+        <img src="{{ movie.image.url }}" class="img-fluid rounded shadow-lg" alt="{{ movie.name }}"
+          style="max-height: 450px; object-fit: cover; border: 1px solid rgba(255,255,255,0.1);">
+        {% else %}
+        <div class="d-flex justify-content-center align-items-center bg-secondary rounded shadow-lg"
+          style="height: 450px; border: 1px solid rgba(255,255,255,0.1);">
+          <i class="fas fa-film fa-5x text-light"></i>
         </div>
-  
-        <div class="show-times">
-          <div class="time-box">
-            {{ theater.time }}
-            <a href="{% url 'book_seats' theater.id %}">
-              <span>Book Now</span>
-            </a>
-          </div>
+        {% endif %}
+      </div>
+      <div class="col-md-8 p-4 d-flex flex-column justify-content-center">
+        <div class="d-flex flex-wrap gap-2 mb-3">
+          <span class="badge rounded-pill"
+            style="background-color: rgba(255, 60, 60, 0.15); color: #ff5e5e; border: 1px solid rgba(255, 60, 60, 0.3); padding: 8px 14px; font-size: 13px;"><i
+              class="fas fa-star me-1"></i> {{ movie.rating }}/10</span>
+          {% for genre in movie.genres.all %}
+          <span class="badge rounded-pill"
+            style="background-color: rgba(100, 100, 255, 0.15); color: #9c9cff; border: 1px solid rgba(100, 100, 255, 0.3); padding: 8px 14px; font-size: 13px;">{{ genre.name }}</span>
+          {% endfor %}
+          {% for lang in movie.languages.all %}
+          <span class="badge rounded-pill"
+            style="background-color: rgba(255, 255, 255, 0.05); color: #ccc; border: 1px solid rgba(255, 255, 255, 0.2); padding: 8px 14px; font-size: 13px;">{{ lang.name }}</span>
+          {% endfor %}
         </div>
-        {% endfor %}
-      {% else %}
-        <!-- Message when no theaters are available -->
-        <div class="no-theaters mt-4">
-          <p>Sorry, no theaters are available for this movie at the moment.</p>
+
+        <h1 class="display-4 fw-bold mb-3"
+          style="background: linear-gradient(90deg, #c276ff, #ff6b9d); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 2.5rem;">
+          {{ movie.name }}</h1>
+
+        <p class="text-light opacity-75 fs-6 mb-4" style="max-width: 95%;">{{ movie.description }}</p>
+
+        <div class="cast-box p-3 rounded mb-4"
+          style="background-color: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); max-width: 90%;">
+          <h6 class="text-light mb-2"><i class="fas fa-user-friends me-2 text-pink" style="color: #ff6b9d;"></i> Cast & Crew</h6>
+          <p class="text-light opacity-75 mb-0 small">{{ movie.cast }}</p>
         </div>
-      {% endif %}
-  
-      <div class="non-cancellable mt-4">
-        <i class="fas fa-circle text-warning"></i> Non-cancellable
+
+        {% if movie.trailer_url %}
+        <div>
+          <a href="{{ movie.trailer_url }}" target="_blank"
+            class="btn btn-trailer text-white rounded-pill px-4 py-2 shadow fw-bold d-inline-block text-decoration-none"
+            style="background: linear-gradient(135deg, #ff416c, #ff4b2b); border: none; transition: all 0.3s;">
+            <i class="fab fa-youtube me-2"></i> Watch on YouTube
+          </a>
+        </div>
+        {% endif %}
       </div>
     </div>
-  </body>
-<!-- <h1>Theater for {{movie.name}}</h1>
-<ul>
-  {% for theater in theaters %}
-  <li>
-    <strong>{{theater.name}}</strong>{{theater.time}}
-    <a href="{% url 'book_seats' theater.id %}">View Seats</a>
-  </li>
-  {% endfor %}
-</ul> -->
+  </div>
+
+  <!-- ===== DATE STRIP (BookMyShow Style) ===== -->
+  <div class="date-strip-container gsap-fade-up">
+    <div class="date-strip">
+      {% for date in available_dates %}
+      <a href="?date={{ date|date:'Y-m-d' }}" 
+         class="date-tab {% if date == selected_date %}active{% endif %} {% if forloop.first %}today{% endif %}">
+        <div class="day-name">{{ date|date:'D' }}</div>
+        <div class="day-num">{{ date|date:'d' }}</div>
+        <div class="month-name">{{ date|date:'M' }}</div>
+      </a>
+      {% empty %}
+      <div class="text-center text-muted py-3 w-100">No dates available</div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Filter Bar -->
+  <div class="filter-bar gsap-fade-up">
+    <span class="filter-pill"><i class="fas fa-language"></i> Tamil &bull; 2D</span>
+    <span class="filter-pill"><i class="fas fa-sort"></i> Sort by</span>
+    <span class="filter-pill"><i class="fas fa-film"></i> Special Formats</span>
+    <span class="filter-pill"><i class="fas fa-times-circle"></i> Cancellable</span>
+  </div>
+
+  <!-- ===== THEATER LIST (Grouped by Theater Name) ===== -->
+  {% if grouped_theaters %}
+    {% for theater_name, shows in grouped_theaters.items %}
+    <div class="theater-card gsap-fade-up">
+      <div class="theater-header">
+        <div class="theater-name-area">
+          <div class="theater-name">
+            {{ theater_name }}: {{ current_city }}
+            <span class="info-icon" title="Theater info"><i class="fas fa-info"></i></span>
+          </div>
+          <div class="theater-subtitle">
+            <i class="fas fa-exclamation-circle"></i> Non-cancellable
+          </div>
+          <div class="amenity-badges">
+            <span class="amenity-badge"><i class="fas fa-mobile-alt text-success"></i> M-Ticket</span>
+            <span class="amenity-badge"><i class="fas fa-utensils text-warning"></i> Food & Beverage</span>
+          </div>
+        </div>
+        <button class="theater-heart"><i class="far fa-heart"></i></button>
+      </div>
+      
+      <div class="showtime-area">
+        {% for show in shows %}
+        <a href="{% url 'book_seats' show.id %}" class="showtime-box">
+          <div class="time">{{ show.time|date:"h:i A" }}</div>
+          <div class="screen-type">{{ show.screen_type }}</div>
+          {% if show.time.hour >= 21 %}
+          <span class="night-icon"><i class="fas fa-moon"></i></span>
+          {% endif %}
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+    {% endfor %}
+  {% else %}
+    <div class="text-center py-5 gsap-fade-up">
+      <i class="fas fa-ticket-alt fa-3x text-muted mb-3"></i>
+      <h4>No shows available</h4>
+      <p class="text-muted">Sorry, no theaters are available for this movie in {{ current_city }} on this date.</p>
+    </div>
+  {% endif %}
+
+  <div class="non-cancellable mt-4 mb-5 gsap-fade-up">
+    <i class="fas fa-circle text-warning"></i> Non-cancellable
+  </div>
+
+  <!-- Reviews Section -->
+  <hr class="border-secondary mt-5">
+  <div class="reviews-section mt-5 gsap-fade-up">
+    <h3 class="mb-4">User Reviews</h3>
+
+    {% if user.is_authenticated %}
+    <div class="card bg-dark border-secondary mb-4">
+      <div class="card-body">
+        <form method="POST">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label class="form-label">Rate this movie</label>
+            <select name="rating" class="form-select bg-dark text-light border-secondary" style="width: 150px;">
+              <option value="5">&#11088;&#11088;&#11088;&#11088;&#11088; (5/5)</option>
+              <option value="4">&#11088;&#11088;&#11088;&#11088; (4/5)</option>
+              <option value="3">&#11088;&#11088;&#11088; (3/5)</option>
+              <option value="2">&#11088;&#11088; (2/5)</option>
+              <option value="1">&#11088; (1/5)</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Write a review</label>
+            <textarea name="comment" class="form-control bg-dark text-light border-secondary" rows="3" required
+              placeholder="What did you think of the movie?"></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary">Submit Review</button>
+        </form>
+      </div>
+    </div>
+    {% else %}
+    <div class="alert alert-secondary">
+      <a href="{% url 'login' %}" class="text-decoration-none fw-bold">Log in</a> to leave a review.
+    </div>
+    {% endif %}
+
+    <div class="existing-reviews mt-4">
+      {% for review in reviews %}
+      <div class="card bg-transparent border-secondary mb-3">
+        <div class="card-body">
+          <div class="d-flex justify-content-between">
+            <h6 class="fw-bold text-primary"><i class="fas fa-user-circle me-2"></i>{{ review.user.username }}</h6>
+            <span class="text-warning">
+              {% for i in "12345" %}
+              {% if forloop.counter <= review.rating %}<i class="fas fa-star"></i>{% else %}<i class="far fa-star"></i>{% endif %} 
+              {% endfor %}
+            </span>
+          </div>
+          <small class="text-muted d-block mb-2">{{ review.created_at|date:"M d, Y" }}</small>
+          <p class="mb-0">{{ review.comment }}</p>
+        </div>
+      </div>
+      {% empty %}
+      <p class="text-muted">No reviews yet. Be the first to review!</p>
+      {% endfor %}
+    </div>
+  </div>
+
+</div>
 {% endblock %}

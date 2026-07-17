@@ -2,7 +2,7 @@
 
 <div class="container py-5">
   <div class="row">
-    <div class="col-lg-4 mb-4">
+    <div class="col-lg-4 mb-4 gsap-fade-up">
       <!-- User Info Card -->
       <div class="card shadow">
         <div class="card-body text-center">
@@ -21,7 +21,7 @@
     
     <div class="col-lg-8">
       <!-- Profile Update Form Card -->
-      <div class="card shadow mb-4">
+      <div class="card shadow mb-4 gsap-fade-up">
         <div class="card-header bg-primary text-white">
           <h4 class="mb-0"><i class="fas fa-user-edit me-2"></i> Update Profile</h4>
         </div>
@@ -47,36 +47,154 @@
       </div>
       
       <!-- Bookings Card -->
-      <div class="card shadow">
-        <div class="card-header bg-success text-white">
-          <h4 class="mb-0"><i class="fas fa-ticket-alt me-2"> </i> Your Bookings</h4>
-        </div>
-        <div class="card-body">
+      <div class="mb-5 gsap-fade-up" style="animation-delay: 0.2s;">
+        <h3 class="mb-4 text-white fw-bold d-flex align-items-center">
+          <div style="width: 30px; height: 20px; background-color: #00d2ff; border-radius: 5px; margin-right: 15px; position: relative;">
+            <div style="position: absolute; left: -10px; top: 0; bottom: 0; width: 5px; background-color: #e50914; border-radius: 5px;"></div>
+          </div>
+          Booking Receipts
+        </h3>
+        
+        <div class="booking-list">
           {% if bookings %}
-            <div class="row row-cols-1 row-cols-md-2 g-4">
+            <div class="d-flex flex-column gap-4">
               {% for booking in bookings %}
-                <div class="col">
-                  <div class="card h-100 border-0 shadow-sm">
-                    <div class="card-body">
-                      <h5 class="card-title">{{ booking.movie.name }}</h5>
-                      <p class="card-text">
-                        <i class="fas fa-film me-2 text-muted"> </i>  {{ booking.theater.name }}<br>
-                        <i class="fas fa-chair me-2 text-muted"> </i>  Seat: {{ booking.seat.seat_number }}<br>
-                        <i class="far fa-clock me-2 text-muted"> </i>  {{ booking.booked_at|date:"F d, Y H:i" }}
-                      </p>
+                <div class="ticket-stub-wrapper d-flex w-100 shadow-lg">
+                  
+                  <!-- Left Side -->
+                  <div class="ticket-left bg-white p-4 d-flex flex-column justify-content-between position-relative">
+                    <div>
+                      <div class="d-flex align-items-center mb-3">
+                        <span class="badge text-white px-2 py-1 me-2" style="background-color: #ff4b82; font-size: 0.75rem; letter-spacing: 1px;">ADMIT ONE</span>
+                        <span class="text-muted fw-bold" style="font-size: 0.8rem; letter-spacing: 1px;">BOOKMYSEAT PREMIUM</span>
+                      </div>
+                      
+                      <h2 class="fw-bolder text-dark mb-1" style="font-size: 2rem;">{{ booking.movie.name }}</h2>
+                      <div class="text-muted d-flex align-items-center mb-4">
+                        <i class="fas fa-map-marker-alt me-2"></i> {{ booking.theater.name }}
+                      </div>
                     </div>
+                    
+                    <div class="ticket-info-box bg-light rounded-3 p-3 d-flex justify-content-between align-items-center">
+                      <div>
+                        <div class="text-muted mb-1" style="font-size: 0.7rem; font-weight: 600; letter-spacing: 1px;">DATE & TIME</div>
+                        <div class="text-dark fw-bold">{{ booking.theater.time }}</div>
+                      </div>
+                      <div class="text-end">
+                        <div class="text-muted mb-1" style="font-size: 0.7rem; font-weight: 600; letter-spacing: 1px;">SEAT NO</div>
+                        <div class="fw-bold" style="color: #ff4b82; font-size: 1.25rem;">{{ booking.seat.seat_number }}</div>
+                      </div>
+                    </div>
+                    
+                    <!-- Top and bottom circles for the left piece -->
+                    <div class="cutout cutout-top-left"></div>
+                    <div class="cutout cutout-bottom-left"></div>
                   </div>
+                  
+                  <!-- Right Side -->
+                  <div class="ticket-right bg-white p-4 d-flex flex-column align-items-center justify-content-center position-relative">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=BMS-{{ booking.id }}-{{ booking.seat.seat_number }}" alt="QR Code" class="mb-3 rounded border p-1" style="width: 90px; height: 90px;">
+                    
+                    <h3 class="fw-bolder text-dark mb-1">₹150.00</h3>
+                    <div class="text-muted mb-3" style="font-size: 0.7rem; font-family: monospace;">ID: BMS_{{ booking.id }}_{{ booking.seat.id }}</div>
+                    
+                    <a href="{% url 'download_ticket' booking.id %}" class="btn btn-outline-dark rounded-pill fw-bold w-100" style="font-size: 0.8rem; padding: 10px;">
+                      <i class="fas fa-download me-2"></i> DOWNLOAD PDF
+                    </a>
+                    
+                    <!-- Top and bottom circles for the right piece -->
+                    <div class="cutout cutout-top-right"></div>
+                    <div class="cutout cutout-bottom-right"></div>
+                  </div>
+                  
                 </div>
               {% endfor %}
             </div>
           {% else %}
-            <div class="text-center py-5">
-              <i class="fas fa-ticket-alt fa-4x text-muted mb-3"></i>
-              <p class="lead mb-0">No bookings yet. Time to plan your next movie night!</p>
+            <div class="text-center py-5 rounded-4" style="background: rgba(255, 255, 255, 0.05); border: 1px dashed rgba(255,255,255,0.2);">
+              <i class="fas fa-ticket-alt fa-4x text-muted mb-3 opacity-50"></i>
+              <p class="lead mb-0 text-muted">No bookings yet. Time to plan your next movie night!</p>
             </div>
           {% endif %}
         </div>
       </div>
+
+      <!-- Event Bookings Card -->
+      <div class="mb-5 gsap-fade-up" style="animation-delay: 0.3s;">
+        <h3 class="mb-4 text-white fw-bold d-flex align-items-center">
+          <div style="width: 30px; height: 20px; background-color: #ff4b82; border-radius: 5px; margin-right: 15px; position: relative;">
+            <div style="position: absolute; left: -10px; top: 0; bottom: 0; width: 5px; background-color: #00d2ff; border-radius: 5px;"></div>
+          </div>
+          Live Event Receipts
+        </h3>
+        
+        <div class="booking-list">
+          {% if event_bookings %}
+            <div class="d-flex flex-column gap-4">
+              {% for e_booking in event_bookings %}
+                <div class="ticket-stub-wrapper d-flex w-100 shadow-lg">
+                  
+                  <!-- Left Side -->
+                  <div class="ticket-left bg-white p-4 d-flex flex-column justify-content-between position-relative">
+                    <div>
+                      <div class="d-flex align-items-center mb-3">
+                        <span class="badge text-white px-2 py-1 me-2" style="background-color: #00d2ff; font-size: 0.75rem; letter-spacing: 1px;">VIP PASS</span>
+                        <span class="text-muted fw-bold" style="font-size: 0.8rem; letter-spacing: 1px;">{{ e_booking.event.category|upper }} EVENT</span>
+                      </div>
+                      
+                      <h2 class="fw-bolder text-dark mb-1" style="font-size: 2rem;">{{ e_booking.event.name }}</h2>
+                      <div class="text-muted d-flex align-items-center mb-4">
+                        <i class="fas fa-map-marker-alt me-2"></i> {{ e_booking.event.venue }}
+                      </div>
+                    </div>
+                    
+                    <div class="ticket-info-box bg-light rounded-3 p-3 d-flex justify-content-between align-items-center">
+                      <div>
+                        <div class="text-muted mb-1" style="font-size: 0.7rem; font-weight: 600; letter-spacing: 1px;">DATE & TIME</div>
+                        <div class="text-dark fw-bold">{{ e_booking.event.date_time }}</div>
+                      </div>
+                      <div class="text-end">
+                        <div class="text-muted mb-1" style="font-size: 0.7rem; font-weight: 600; letter-spacing: 1px;">TICKETS</div>
+                        <div class="fw-bold" style="color: #00d2ff; font-size: 1.25rem;">{{ e_booking.tickets_count }}</div>
+                      </div>
+                    </div>
+                    
+                    <!-- Top and bottom circles for the left piece -->
+                    <div class="cutout cutout-top-left"></div>
+                    <div class="cutout cutout-bottom-left"></div>
+                  </div>
+                  
+                  <!-- Right Side -->
+                  <div class="ticket-right bg-white p-4 d-flex flex-column align-items-center justify-content-center position-relative">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=EVT-{{ e_booking.id }}-{{ request.user.username }}" alt="QR Code" class="mb-3 rounded border p-1" style="width: 90px; height: 90px;">
+                    
+                    <h3 class="fw-bolder text-dark mb-1">₹{{ e_booking.total_amount }}</h3>
+                    <div class="text-muted mb-3" style="font-size: 0.7rem; font-family: monospace;">ID: EVT_{{ e_booking.id }}</div>
+                    
+                    <button class="btn btn-sm text-white fw-bold w-100 mb-2" style="background-color: #00d2ff; border-radius: 20px;" disabled>
+                      <i class="fas fa-check-circle me-1"></i> PAID
+                    </button>
+                    <a href="{% url 'download_event_ticket' e_booking.id %}" class="btn btn-sm text-white fw-bold w-100" style="background-color: #ff4b82; border-radius: 20px;">
+                      <i class="fas fa-download me-1"></i> PDF
+                    </a>
+                    
+                    <!-- Top and bottom circles for the right piece -->
+                    <div class="cutout cutout-top-right"></div>
+                    <div class="cutout cutout-bottom-right"></div>
+                  </div>
+                  
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="text-center py-5 rounded-4" style="background: rgba(255, 255, 255, 0.05); border: 1px dashed rgba(255,255,255,0.2);">
+              <i class="fas fa-calendar-times fa-4x text-muted mb-3 opacity-50"></i>
+              <p class="lead mb-0 text-muted">No live event bookings yet. Catch a live show soon!</p>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
     </div>
   </div>
 </div>
@@ -87,44 +205,93 @@
 <!-- Custom CSS -->
 <style>
   body {
-    background-color: #f8f9fa;
+    background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%) !important;
   }
   .card {
     border-radius: 15px;
-    border: none;
-    transition: transform 0.3s ease-in-out;
+    border: 1px solid rgba(255,255,255,0.1);
+    background-color: rgba(20, 20, 30, 0.6);
+    backdrop-filter: blur(10px);
   }
-  .card:hover {
-    transform: translateY(-5px);
+  .ticket-stub-wrapper {
+    border-radius: 15px;
+    overflow: visible;
+    position: relative;
+    max-width: 800px;
   }
-  .card-header {
+  .ticket-left {
+    flex: 1;
     border-top-left-radius: 15px;
+    border-bottom-left-radius: 15px;
+    border-right: 2px dashed #ddd;
+  }
+  .ticket-right {
+    width: 250px;
     border-top-right-radius: 15px;
+    border-bottom-right-radius: 15px;
   }
-  /* Style form fields */
-  form input, form select, form textarea {
-    display: block;
-    width: 100%;
-    padding: 0.375rem 0.75rem;
-    font-size: 1rem;
-    font-weight: 400;
-    line-height: 1.5;
-    color: #212529;
-    background-color: #fff;
-    background-clip: padding-box;
-    border: 1px solid #ced4da;
-    border-radius: 0.25rem;
-    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  .ticket-info-box {
+    background-color: #f8f9fa !important;
   }
-  form input:focus, form select:focus, form textarea:focus {
-    border-color: #86b7fe;
-    outline: 0;
-    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+  
+  /* Perforated cutouts to simulate a tear-off ticket */
+  .cutout {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    background-color: #1a1b3a; /* Match the dark background */
+    border-radius: 50%;
+    z-index: 10;
   }
-  @media (max-width: 767.98px) {
-    .card-body {
-      padding: 1rem;
+  .cutout-top-left {
+    top: -15px;
+    right: -16px;
+  }
+  .cutout-bottom-left {
+    bottom: -15px;
+    right: -16px;
+  }
+  .cutout-top-right {
+    top: -15px;
+    left: -16px;
+  }
+  .cutout-bottom-right {
+    bottom: -15px;
+    left: -16px;
+  }
+
+  @media (max-width: 768px) {
+    .ticket-stub-wrapper {
+      flex-direction: column;
     }
+    .ticket-left {
+      border-bottom-left-radius: 0;
+      border-top-right-radius: 15px;
+      border-right: none;
+      border-bottom: 2px dashed #ddd;
+    }
+    .ticket-right {
+      width: 100%;
+      border-top-right-radius: 0;
+      border-bottom-left-radius: 15px;
+    }
+    .cutout-top-left { bottom: -15px; left: -15px; top: auto; right: auto; }
+    .cutout-bottom-left { bottom: -15px; right: -15px; top: auto; }
+    .cutout-top-right { top: -15px; left: -15px; bottom: auto; right: auto; }
+    .cutout-bottom-right { top: -15px; right: -15px; bottom: auto; }
+  }
+
+  /* Ensure form inputs inside profile match dark theme */
+  form input, form select, form textarea {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid var(--border-color) !important;
+    color: var(--text-main) !important;
+    border-radius: 6px;
+    padding: 10px 15px;
+  }
+  form input:focus {
+    box-shadow: 0 0 0 0.25rem rgba(229, 9, 20, 0.25) !important;
+    border-color: var(--accent-color) !important;
   }
 </style>
 <!-- <div class="container mt-4">

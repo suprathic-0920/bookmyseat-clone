@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Event Ticket - EVT-{{ booking.id }}</title>
+    <style>
+        body {
+            font-family: 'Helvetica', 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+        .ticket-container {
+            width: 100%;
+            border: 2px dashed #00d2ff;
+            padding: 20px;
+            margin: 20px auto;
+        }
+        .header {
+            text-align: center;
+            background-color: #1a1a2e;
+            color: white;
+            padding: 10px;
+            margin-bottom: 20px;
+        }
+        .header h1 {
+            margin: 0;
+            color: #00d2ff;
+        }
+        .row {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        .col-left {
+            width: 60%;
+            display: inline-block;
+            vertical-align: top;
+        }
+        .col-right {
+            width: 35%;
+            display: inline-block;
+            vertical-align: top;
+            text-align: right;
+        }
+        .label {
+            font-size: 10px;
+            color: #777;
+            text-transform: uppercase;
+        }
+        .value {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        .event-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #ff4b82;
+            margin-bottom: 5px;
+        }
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 12px;
+            color: #777;
+            border-top: 1px solid #ccc;
+            padding-top: 10px;
+        }
+        .qr-placeholder {
+            text-align: right;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="ticket-container">
+        <div class="header">
+            <h1>BOOKMYSEAT LIVE EVENT</h1>
+        </div>
+        
+        <div class="row">
+            <div class="col-left">
+                <div class="event-title">{{ booking.event.name }}</div>
+                <div class="value">{{ booking.event.venue }}</div>
+                
+                <div class="label">Date & Time</div>
+                <div class="value">{{ booking.event.date_time|date:"F j, Y, g:i a" }}</div>
+                
+                <div class="label">Category</div>
+                <div class="value">{{ booking.event.category|upper }}</div>
+                
+                <div class="label">Booked By</div>
+                <div class="value">{{ booking.user.username }} ({{ booking.user.email }})</div>
+            </div>
+            
+            <div class="col-right">
+                <div class="label">Booking ID</div>
+                <div class="value" style="font-size: 18px; color: #00d2ff;">EVT-{{ booking.id }}</div>
+                
+                <div class="label">Tickets</div>
+                <div class="value" style="font-size: 18px;">{{ booking.tickets_count }}</div>
+                
+                <div class="label">Total Paid</div>
+                <div class="value" style="font-size: 18px; color: green;">₹{{ booking.total_amount }}</div>
+                
+                <div class="qr-placeholder">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=EVT-{{ booking.id }}-{{ booking.user.username }}" alt="QR Code">
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            Please show this digital or printed ticket at the venue entrance. Valid ID may be required.
+        </div>
+    </div>
+</body>
+</html>
