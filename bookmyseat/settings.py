@@ -110,6 +110,14 @@ DATABASES = {
         }
     }
 }
+
+if IS_VERCEL:
+    import tempfile
+    import shutil
+    tmp_db = os.path.join(tempfile.gettempdir(), 'db.sqlite3')
+    if not os.path.exists(tmp_db):
+        shutil.copyfile(BASE_DIR / 'db.sqlite3', tmp_db)
+    DATABASES['default']['NAME'] = tmp_db
 # Removed the Render PostgreSQL line so it defaults to the local SQLite database above.
 
 
