@@ -11,12 +11,8 @@ from django.db.models import Sum, Count, F, Q, ExpressionWrapper, FloatField
 from django.db.models.functions import TruncDay, TruncWeek, TruncMonth, ExtractHour
 from django.utils import timezone
 from django.core.cache import cache
-try:
-    from channels.layers import get_channel_layer
-    from asgiref.sync import async_to_sync
-except ImportError:
-    get_channel_layer = None
-    async_to_sync = None
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
 from django.template.loader import get_template
 from django.http import HttpResponse
 from django.contrib import messages
@@ -327,7 +323,7 @@ def book_seats(request, theater_id):
                     return redirect('book_seats', theater_id=theater_id)
                 
                 # 3. Apply locks and Broadcast over WebSockets
-                channel_layer = get_channel_layer() if get_channel_layer else None
+                channel_layer = get_channel_layer()
                 for seat in selected_seats:
                     seat.is_locked = True
                     seat.locked_by = request.user
@@ -335,11 +331,10 @@ def book_seats(request, theater_id):
                     seat.save()
                     seat_ids.append(seat.id)
                     try:
-                        if channel_layer and async_to_sync:
-                            async_to_sync(channel_layer.group_send)(
-                                f'theater_{theater_id}',
-                                {'type': 'seat_update', 'action': 'locked', 'seat_id': seat.id}
-                            )
+                        async_to_sync(channel_layer.group_send)(
+                            f'theater_{theater_id}',
+                            {'type': 'seat_update', 'action': 'locked', 'seat_id': seat.id}
+                        )
                     except Exception as e:
                         pass
         except OperationalError:

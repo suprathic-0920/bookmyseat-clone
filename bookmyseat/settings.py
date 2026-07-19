@@ -35,10 +35,6 @@ DEBUG = True
 # Added 'localhost' and '127.0.0.1' so you can run the server locally during the internship
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.vercel.app']
 
-# Vercel HTTPS & CSRF Settings
-CSRF_TRUSTED_ORIGINS = ['https://*.vercel.app']
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-
 
 # Application definition
 
@@ -105,22 +101,15 @@ if not IS_VERCEL:
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-import dj_database_url
-
-if IS_VERCEL and os.environ.get('DATABASE_URL'):
-    DATABASES = {
-        'default': dj_database_url.config(default=os.environ.get('DATABASE_URL'))
-    }
-else:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
-            'OPTIONS': {
-                'timeout': 1,
-            }
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+        'OPTIONS': {
+            'timeout': 1,
         }
     }
+}
 # Removed the Render PostgreSQL line so it defaults to the local SQLite database above.
 
 

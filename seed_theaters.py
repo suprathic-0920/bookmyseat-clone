@@ -86,6 +86,7 @@ def seed():
     # Clear existing theaters
     print("Clearing existing theaters and seats...")
     Theater.objects.all().delete()
+    Seat.objects.all().delete()
 
     now = timezone.now()
     today = now.date()
@@ -101,12 +102,12 @@ def seed():
             selected_movies = random.sample(movies, min(len(movies), random.randint(2, 3)))
 
             for movie in selected_movies:
-                # Create showtimes for next 7 days
-                for day_offset in range(7):
+                # Create showtimes for next 2 days to keep DB size small for Vercel
+                for day_offset in range(2):
                     show_date = today + datetime.timedelta(days=day_offset)
 
-                    # Pick 2-4 random showtimes per day
-                    num_shows = random.randint(2, 4)
+                    # Pick 1 random showtime per day
+                    num_shows = 1
                     selected_times = random.sample(SHOWTIME_HOURS, min(len(SHOWTIME_HOURS), num_shows))
 
                     for hour, minute in selected_times:
