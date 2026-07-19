@@ -1,13 +1,15 @@
 try:
     from celery import shared_task
 except ImportError:
-    # Fallback for Vercel where celery is not installed
+    # Dummy decorator for Vercel where Celery is uninstalled
     def shared_task(*args, **kwargs):
-        def decorator(func):
+        def wrapper(func):
+            func.apply_async = lambda *a, **kw: func(*a[0]) if a else None
+            func.retry = Exception
             return func
         if len(args) == 1 and callable(args[0]):
-            return args[0]
-        return decorator
+            return wrapper(args[0])
+        return wrapper
 from django.utils import timezone
 from .models import Seat, Booking, EmailLog
 from django.core.mail import EmailMultiAlternatives
